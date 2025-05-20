@@ -12,6 +12,8 @@
 
 
 # 🏠 House Price Prediction
+This project aims to predict house prices using machine learning techniques based on various features of residential properties. The workflow includes data cleaning, feature engineering, handling missing values, encoding categorical variables, feature scaling, and training multiple regression models. The project compares different models to select the best-performing one for accurate price prediction.
+
 # Features
 - Predicts house prices using multiple machine learning models
 - Handles missing data and categorical feature encoding
@@ -32,6 +34,3 @@
 2. Place the dataset files in the `Data/` directory.
 3. Open and run `Program.ipynb` in Jupyter Notebook.
 4. Follow the notebook cells to preprocess data, train models, and view results.
-
-# Project Overview
-This project predicts house prices based on various features using different regression models. It includes data cleaning, feature engineering, encoding, scaling, and model evaluation steps.
