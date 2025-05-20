@@ -1,3 +1,16 @@
+
+![img 3](https://github.com/user-attachments/assets/c19aa3ec-c76a-4047-a50e-5d3b4fd93dbf)
+
+
+
+![img 4](https://github.com/user-attachments/assets/fd5e28c8-4433-4b25-b573-9bdda1e0c2f0)
+
+
+
+![img 5](https://github.com/user-attachments/assets/b5eabfd8-6e40-4a12-8ecc-2f073c977b23)
+
+
+
 # 🏠 House Price Prediction
 # Features
 - Predicts house prices using multiple machine learning models
