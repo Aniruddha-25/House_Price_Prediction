@@ -27,7 +27,7 @@ This project aims to predict house prices using machine learning techniques base
 
 # 🛠️ **Technologies Used**
 
-* Python 3.13
+* Python 3.12.10
 
 1. Pandas
 2. NumPy
