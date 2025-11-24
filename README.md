@@ -1,36 +1,60 @@
 
-![img 3](https://github.com/user-attachments/assets/c19aa3ec-c76a-4047-a50e-5d3b4fd93dbf)
 
 
 
-![img 4](https://github.com/user-attachments/assets/fd5e28c8-4433-4b25-b573-9bdda1e0c2f0)
+# 🏠 **House Price Prediction**
 
+A clean, modern, and fully documented machine learning project designed to predict residential property prices using advanced data preprocessing and regression models.
 
+---
 
-![img 5](https://github.com/user-attachments/assets/b5eabfd8-6e40-4a12-8ecc-2f073c977b23)
+# 🧠 **Overview**
 
+This project aims to predict house prices using machine learning techniques based on various features of residential properties. The workflow includes data cleaning, feature engineering, handling missing values, encoding categorical variables, feature scaling, and training multiple regression models. The system also includes a full-stack web interface built by **Aniruddha Nagesh Salvankar**, allowing prediction and model training directly through a browser.
 
+---
 
-# 🏠 House Price Prediction
-This project aims to predict house prices using machine learning techniques based on various features of residential properties. The workflow includes data cleaning, feature engineering, handling missing values, encoding categorical variables, feature scaling, and training multiple regression models. The project compares different models to select the best-performing one for accurate price prediction.
+# ⭐ **Features**
 
-# Features
-- Predicts house prices using multiple machine learning models
-- Handles missing data and categorical feature encoding
-- Visualizes data distributions and missing values
-- Supports model comparison and selection
+* Predicts house prices using multiple machine learning models
+* Handles missing values, categorical encoding, and feature scaling
+* Includes a full Flask backend and modern responsive frontend
+* Saves and loads trained ML models automatically
+* Supports model comparison and selection
+* Visualizes training progress and prediction results (Frontend UI)
 
-# Technologies Used
-- Python 3.13
-1) Pandas
-1) NumPy
-1) Matplotlib
-1) Seaborn
-1) Scikit-learn
-1)  XGBoost
+---
 
-# How to Use?
+# 🛠️ **Technologies Used**
+
+* Python 3.13
+
+1. Pandas
+2. NumPy
+3. Matplotlib
+4. Seaborn
+5. Scikit-learn
+6. XGBoost
+
+* Flask (for backend API)
+* HTML, CSS, JavaScript (for frontend UI)
+
+---
+
+# 🚀 **How to Use?**
+
 1. Clone the repository.
-2. Place the dataset files in the `Data/` directory.
-3. Open and run `Program.ipynb` in Jupyter Notebook.
-4. Follow the notebook cells to preprocess data, train models, and view results.
+2. Place the dataset files inside the `Data/` directory.
+3. Install dependencies using:
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+4. Run the Flask application:
+
+   ```bash
+   python app.py
+   ```
+5. Open your browser and visit:
+   **[http://127.0.0.1:5000](http://127.0.0.1:5000)**
+6. Use the interface to train the model and predict house prices.
