@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>House Price Prediction</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1 class="logo">🏠 House Price Predictor</h1>
+                <p class="tagline">Predict house prices using machine learning</p>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Model Training Section -->
+            <section class="section training-section">
+                <div class="section-card">
+                    <h2 class="section-title">Model Training</h2>
+                    <p class="section-description">Train the machine learning model using the dataset</p>
+                    
+                    <div class="model-info-container">
+                        <div id="modelStatus" class="model-status status-untrained">
+                            <span class="status-indicator"></span>
+                            <span class="status-text">Model Status: Not Trained</span>
+                        </div>
+                    </div>
+                    
+                    <button id="trainBtn" class="btn btn-primary" onclick="trainModel()">
+                        <span class="btn-icon">⚙️</span>
+                        Train Model
+                    </button>
+                    
+                    <div id="trainingProgress" class="training-progress hidden">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                        <p id="progressText" class="progress-text">Training in progress...</p>
+                    </div>
+                    
+                    <div id="trainingResult" class="training-result hidden">
+                        <div class="result-box success">
+                            <h3>Training Complete!</h3>
+                            <p id="modelName"></p>
+                            <p id="accuracy"></p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Prediction Section -->
+            <section class="section prediction-section">
+                <div class="section-card">
+                    <h2 class="section-title">Price Prediction</h2>
+                    <p class="section-description">Enter house features to predict the price</p>
+                    
+                    <form id="predictionForm" class="prediction-form">
+                        <div class="form-group">
+                            <label for="lotArea" class="form-label">Lot Area (sq ft)</label>
+                            <input type="number" id="lotArea" name="lotArea" placeholder="e.g., 8450" value="8450">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="yearBuilt" class="form-label">Year Built</label>
+                            <input type="number" id="yearBuilt" name="yearBuilt" placeholder="e.g., 2003" value="2003" min="1800" max="2100">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="livArea" class="form-label">Living Area (sq ft)</label>
+                            <input type="number" id="livArea" name="livArea" placeholder="e.g., 1710" value="1710">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="bedrooms" class="form-label">Bedrooms</label>
+                            <input type="number" id="bedrooms" name="bedrooms" placeholder="e.g., 3" value="3" min="0" max="15">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="bathrooms" class="form-label">Bathrooms</label>
+                            <input type="number" id="bathrooms" name="bathrooms" placeholder="e.g., 2" value="2" min="0" max="10">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="garageArea" class="form-label">Garage Area (sq ft)</label>
+                            <input type="number" id="garageArea" name="garageArea" placeholder="e.g., 548" value="548">
+                        </div>
+                        
+                        <div class="button-group">
+                            <button type="button" class="btn btn-secondary" onclick="predictPrice()">
+                                <span class="btn-icon">🔮</span>
+                                Predict Price
+                            </button>
+                            <button type="button" class="btn btn-reset" onclick="resetPrediction()">
+                                <span class="btn-icon">🔄</span>
+                                Reset
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <div id="predictionResult" class="prediction-result hidden">
+                        <div class="result-box prediction-box">
+                            <h3>✨ Predicted House Price ✨</h3>
+                            <p id="predictedPrice" class="predicted-value">₹0.00</p>
+                            <div class="price-details">
+                                <p class="result-note">Powered by Advanced Machine Learning</p>
+                                <p class="confidence-note">📊 AI-Powered Prediction</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2025 House Price Prediction Application. All rights reserved.</p>
+            <p>Built with Flask, Machine Learning, and modern web technologies.</p>
+        </footer>
+    </div>
+
+    <!-- Notifications -->
+    <div id="notification" class="notification hidden"></div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
