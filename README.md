@@ -4,9 +4,21 @@
 
 # 🏠 **House Price Prediction**
 
-A clean, modern, and fully documented machine learning project designed to predict residential property prices using advanced data preprocessing and regression models.
+<img width="1898" height="868" alt="House Price Predictor 1" src="https://github.com/user-attachments/assets/70fe32ef-4b33-402f-906b-f207c36b7a07" />
 
 ---
+
+<img width="1918" height="863" alt="House Price Predictor 2" src="https://github.com/user-attachments/assets/f96b0726-9fe9-4c34-bf20-254a694bd93f" />
+
+---
+
+<img width="1902" height="867" alt="House Price Predictor 3" src="https://github.com/user-attachments/assets/df52007a-90b1-4245-ad0c-e9dbba8735e4" />
+
+
+
+---
+
+A clean, modern, and fully documented machine learning project designed to predict residential property prices using advanced data preprocessing and regression models.
 
 # 🧠 **Overview**
 
