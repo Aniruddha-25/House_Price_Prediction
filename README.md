@@ -44,13 +44,13 @@ This project aims to predict house prices using machine learning techniques base
 # 🚀 **How to Use?**
 
 1. Clone the repository.
-2. Place the dataset files inside the `Data/` directory.
-3. Install dependencies using:
+   
+1. Install dependencies using:
 
    ```bash
    pip install -r requirements.txt
    ```
-4. Run the Flask application:
+1. Run the Flask application:
 
    ```bash
    python app.py
