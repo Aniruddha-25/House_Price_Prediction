@@ -6,6 +6,10 @@
 
 <img width="1898" height="868" alt="House Price Predictor 1" src="https://github.com/user-attachments/assets/70fe32ef-4b33-402f-906b-f207c36b7a07" />
 
+--- 
+
+<img width="1896" height="865" alt="House Price Predictor 4" src="https://github.com/user-attachments/assets/00d8ce46-ef52-45ca-9480-61b6e8ae6b17" />
+
 ---
 
 <img width="1918" height="863" alt="House Price Predictor 2" src="https://github.com/user-attachments/assets/f96b0726-9fe9-4c34-bf20-254a694bd93f" />
@@ -14,6 +18,9 @@
 
 <img width="1902" height="867" alt="House Price Predictor 3" src="https://github.com/user-attachments/assets/df52007a-90b1-4245-ad0c-e9dbba8735e4" />
 
+
+---
+<img width="1897" height="865" alt="House Price Predictor 5" src="https://github.com/user-attachments/assets/133ec2a4-fae7-46c5-9f34-d1892f111e2a" />
 
 
 ---
