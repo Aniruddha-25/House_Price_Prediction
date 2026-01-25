@@ -19,7 +19,6 @@ from sklearn.isotonic import IsotonicRegression
 from sklearn.model_selection import KFold, cross_val_score
 from sklearn.metrics import make_scorer, r2_score
 import calendar
-import pickle
 import os
 import logging
 from flask import Flask, render_template, request, jsonify
@@ -33,14 +32,6 @@ log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
 WSGIRequestHandler.protocol_version = "HTTP/1.1"
 
-# Create models directory if it doesn't exist
-MODEL_DIR = './models'
-if not os.path.exists(MODEL_DIR):
-    os.makedirs(MODEL_DIR)
-    print(f"Created models directory: {MODEL_DIR}")
-
-MODEL_PATH = os.path.join(MODEL_DIR, 'model.pkl')
-
 # Global variables for model and scaler
 best_model = None
 scaler = None
@@ -50,7 +41,7 @@ model_score = None
 
 class HousePricePredictor:
     """Main class for house price prediction"""
-    
+
     def __init__(self):
         self.data = None
         self.scaler = StandardScaler()
@@ -60,7 +51,7 @@ class HousePricePredictor:
         self.y_train = None
         self.X_test = None
         self.feature_columns = None
-        
+
     def load_data(self, data_path='./Data/combined_data.csv'):
         """Load combined training and testing data"""
         try:
@@ -75,35 +66,35 @@ class HousePricePredictor:
         except Exception as e:
             print(f"Error loading data: {e}")
             return False
-    
+
     def handle_missing_values(self):
         """Handle missing values in the dataset"""
         # Handle MSZoning
         mszoning_mode = self.data["MSZoning"].mode()[0]
         self.data["MSZoning"] = self.data["MSZoning"].fillna(mszoning_mode)
-        
+
         # Handle Garage features
         num_garage_feat = ["GarageType", "GarageFinish", "GarageQual", "GarageCond"]
         cat_garage_feat = ["GarageCars", "GarageArea", "GarageYrBlt"]
-        
+
         garage_cont = "NA"
         for feat in cat_garage_feat + num_garage_feat:
             if feat in self.data.columns:
                 self.data[feat] = self.data[feat].fillna(garage_cont)
-        
+
         # Handle other missing numerical values with median
         numerical_cols = self.data.select_dtypes(include=[np.number]).columns
         for col in numerical_cols:
             if self.data[col].isnull().any():
                 self.data[col] = self.data[col].fillna(self.data[col].median())
-        
+
         # Handle other missing categorical values with mode
         categorical_cols = self.data.select_dtypes(include=['object']).columns
         for col in categorical_cols:
             if self.data[col].isnull().any():
                 mode_val = self.data[col].mode()[0] if len(self.data[col].mode()) > 0 else "Unknown"
                 self.data[col] = self.data[col].fillna(mode_val)
-    
+
     def convert_numerical_to_categorical(self):
         """Convert numerical features to categorical"""
         for_num_conv = [
@@ -114,12 +105,12 @@ class HousePricePredictor:
             "MoSold",
             "YrSold",
         ]
-        
+
         self.data["MoSold"] = self.data["MoSold"].apply(lambda x: calendar.month_abbr[int(x)] if x != 'NA' else 'NA')
-        
+
         for feat in for_num_conv:
             self.data[feat] = self.data[feat].astype(str)
-    
+
     def apply_ordinal_encoding(self):
         """Apply ordinal encoding for ordinal categorical features"""
         ordinal_mappings = {
@@ -141,12 +132,12 @@ class HousePricePredictor:
             "PavedDrive": ["N", "P", "Y"],
             "Utilities": ["ELO", "NoSeWa", "NoSeWr", "AllPub"],
         }
-        
+
         for feature, categories in ordinal_mappings.items():
             if feature in self.data.columns:
                 dtype_cat = CategoricalDtype(categories=categories, ordered=True)
                 self.data[feature] = self.data[feature].astype(dtype_cat).cat.codes
-    
+
     def one_hot_encode(self):
         """Apply one-hot encoding for nominal categorical features"""
         object_features = self.data.select_dtypes(include='object').columns.tolist()
@@ -156,25 +147,25 @@ class HousePricePredictor:
             prefix=object_features, 
             drop_first=True
         )
-    
+
     def prepare_train_test_data(self):
         """Split data into training and testing sets"""
         self.feature_columns = [col for col in self.data.columns if col != 'SalePrice']
-        
+
         self.X_train = self.data[:self.len_train][self.feature_columns]
         self.y_train = self.data["SalePrice"][:self.len_train]
         self.X_test = self.data[self.len_train:][self.feature_columns]
-        
+
         # Select only numerical features
         numerical_cols = self.X_train.select_dtypes(include=[np.number]).columns.tolist()
         self.X_train = self.X_train[numerical_cols]
         self.X_test = self.X_test[numerical_cols]
         self.feature_columns = numerical_cols
-        
+
         # Scale the features
         self.X_train = self.scaler.fit_transform(self.X_train)
         self.X_test = self.scaler.transform(self.X_test)
-    
+
     def train_models(self):
         """Train multiple models and select the best one"""
         models = {
@@ -189,9 +180,9 @@ class HousePricePredictor:
             "XGBRegressor": XGBRegressor(random_state=42, verbosity=0),
             "IsotonicRegression": IsotonicRegression(),
         }
-        
+
         models_score = []
-        
+
         for model_name, model_instance in models.items():
             print(f"Training model: {model_name}")
             try:
@@ -204,61 +195,33 @@ class HousePricePredictor:
             except Exception as e:
                 print(f"Model {model_name} failed: {e}")
                 continue
-        
+
         # Select best model
         if models_score:
             best_model_name, best_score, best_model_instance = max(models_score, key=lambda x: x[1])
             self.best_model = best_model_instance
             self.model_score = best_score
-            
+
             # Train on full dataset
             self.best_model.fit(self.X_train, self.y_train)
-            
+
             print(f"\nBest Model: {best_model_name}")
             print(f"Score: {best_score * 100:.2f}%")
             return best_model_name, best_score
         else:
             raise Exception("No models trained successfully")
-    
+
     def predict(self, input_data):
         """Make prediction on new data"""
         if self.best_model is None:
             return None
-        
+
         # Scale the input
         input_scaled = self.scaler.transform([input_data])
-        
+
         # Make prediction
         prediction = self.best_model.predict(input_scaled)
         return prediction[0]
-    
-    def save_model(self, filepath='model.pkl'):
-        """Save the trained model and scaler"""
-        # Use the global MODEL_PATH if full path not provided
-        if filepath == 'model.pkl':
-            filepath = MODEL_PATH
-        with open(filepath, 'wb') as f:
-            pickle.dump({
-                'model': self.best_model,
-                'scaler': self.scaler,
-                'features': self.feature_columns,
-                'score': self.model_score
-            }, f)
-    
-    def load_model(self, filepath='model.pkl'):
-        """Load a previously trained model"""
-        # Use the global MODEL_PATH if full path not provided
-        if filepath == 'model.pkl':
-            filepath = MODEL_PATH
-        if os.path.exists(filepath):
-            with open(filepath, 'rb') as f:
-                data = pickle.load(f)
-                self.best_model = data['model']
-                self.scaler = data['scaler']
-                self.feature_columns = data['features']
-                self.model_score = data['score']
-                return True
-        return False
 
 
 # Initialize predictor
@@ -276,73 +239,68 @@ def train_model():
     """Train the model endpoint with comprehensive error handling"""
     max_retries = 2
     retry_count = 0
-    
+
     while retry_count < max_retries:
         try:
             print(f"\n{'='*60}")
             print(f"Training attempt {retry_count + 1}/{max_retries}")
             print(f"{'='*60}")
-            
+
             print("📂 Loading data...")
             if not predictor.load_data():
                 return jsonify({'error': 'Failed to load data. Check if combined_data.csv exists.'}), 400
             print(f"✓ Data loaded successfully ({len(predictor.data)} rows)")
-            
+
             print("🔧 Handling missing values...")
             predictor.handle_missing_values()
             print("✓ Missing values handled")
-            
+
             print("🔄 Converting numerical to categorical...")
             predictor.convert_numerical_to_categorical()
             print("✓ Conversion complete")
-            
+
             print("📊 Applying ordinal encoding...")
             predictor.apply_ordinal_encoding()
             print("✓ Ordinal encoding applied")
-            
+
             print("🎨 Applying one-hot encoding...")
             predictor.one_hot_encode()
             print("✓ One-hot encoding complete")
-            
+
             print("📈 Preparing training data...")
             predictor.prepare_train_test_data()
             print(f"✓ Data prepared ({len(predictor.feature_columns)} features)")
-            
+
             print("🤖 Training models (this may take a minute)...")
             best_model_name, best_score = predictor.train_models()
             print(f"✓ Best model: {best_model_name} with score {best_score*100:.2f}%")
-            
-            # Save model
-            print("💾 Saving model...")
-            predictor.save_model()
-            print("✓ Model saved successfully")
-            
+
             print(f"{'='*60}")
             print("✅ Training completed successfully!")
             print(f"{'='*60}\n")
-            
+
             return jsonify({
                 'success': True,
                 'model_name': best_model_name,
                 'accuracy': f"{best_score * 100:.2f}%",
                 'score': best_score
             }), 200
-            
+
         except Exception as e:
             print(f"❌ Training error (attempt {retry_count + 1}): {str(e)}")
             retry_count += 1
-            
+
             if retry_count >= max_retries:
                 error_msg = f"Training failed after {max_retries} attempts: {str(e)}"
                 print(f"❌ {error_msg}\n")
                 return jsonify({'error': error_msg}), 500
-            
+
             # Reset predictor state for retry
             predictor.best_model = None
             predictor.data = None
             print("🔄 Retrying training...\n")
             continue
-    
+
     return jsonify({'error': 'Maximum training attempts exceeded'}), 500
 
 
@@ -351,34 +309,44 @@ def predict():
     """Predict house price endpoint with safety checks and retry logic"""
     max_retries = 3
     retry_count = 0
-    
+
     while retry_count < max_retries:
         try:
             # Validate request
             if not request.is_json:
                 return jsonify({'error': 'Request must be JSON'}), 400
-            
+
             data = request.json
             if not data or 'features' not in data:
                 return jsonify({'error': 'Missing features in request'}), 400
-            
-            # Load model if not already loaded
+
+            # Check if model is trained
             if predictor.best_model is None:
-                model_loaded = predictor.load_model()
-                if not model_loaded:
-                    return jsonify({'error': 'Model not trained yet. Please train the model first.'}), 400
-            
-            # Validate model is loaded
-            if predictor.best_model is None or predictor.scaler is None or predictor.feature_columns is None:
-                return jsonify({'error': 'Model failed to load. Please train again.'}), 400
-            
+                return (
+                    jsonify(
+                        {
+                            "error": "Model not trained yet. Please train the model first."
+                        }
+                    ),
+                    400,
+                )
+
+            # Validate model is ready
+            if predictor.scaler is None or predictor.feature_columns is None:
+                return (
+                    jsonify(
+                        {"error": "Model training incomplete. Please train again."}
+                    ),
+                    400,
+                )
+
             # Prepare input data with proper error handling
             try:
                 features_data = data['features']
-                
+
                 # Create a DataFrame to properly handle features
                 input_df = pd.DataFrame([[0] * len(predictor.feature_columns)], columns=predictor.feature_columns)
-                
+
                 # Get user inputs
                 lot_area = float(features_data.get('LotArea', 0))
                 year_built = float(features_data.get('YearBuilt', 0))
@@ -386,11 +354,11 @@ def predict():
                 bedrooms = float(features_data.get('BedroomAbvGr', 0))
                 bathrooms = float(features_data.get('FullBath', 0))
                 garage_area = float(features_data.get('GarageArea', 0))
-                
+
                 # Validate inputs
                 if lot_area < 0 or gr_liv_area < 0 or garage_area < 0 or bedrooms < 0 or bathrooms < 0 or year_built < 0:
                     raise ValueError("Values cannot be negative")
-                
+
                 # Set the numerical features
                 for col in input_df.columns:
                     if col == 'LotArea':
@@ -406,31 +374,31 @@ def predict():
                     elif col == 'GarageArea':
                         input_df[col] = garage_area
                     # All other columns remain 0 (default for one-hot encoded categories)
-                
+
                 # Convert to numpy array for prediction
                 input_features = input_df.values.astype(np.float64)
-                
+
                 # Validate input features
                 if np.any(np.isnan(input_features)):
                     raise ValueError("Input contains NaN values")
                 if np.any(np.isinf(input_features)):
                     raise ValueError("Input contains infinite values")
-                
+
                 # Debug: Log the features being sent
                 print(f"📊 Prediction Input: LotArea={lot_area}, YearBuilt={year_built}, "
                       f"GrLivArea={gr_liv_area}, Bedrooms={bedrooms}, "
                       f"Bathrooms={bathrooms}, GarageArea={garage_area}")
                 print(f"📊 Feature array shape: {input_features.shape}, dtype: {input_features.dtype}")
-                
+
             except (ValueError, TypeError, KeyError) as e:
                 return jsonify({'error': f'Invalid input data: {str(e)}'}), 400
-            
+
             # Make prediction with error handling
             try:
                 # Use the scaler with feature_names_in_
                 input_scaled = predictor.scaler.transform(input_features)
                 predicted_price = predictor.best_model.predict(input_scaled)[0]
-                
+
                 # Validate prediction output
                 if predicted_price is None:
                     raise ValueError("Prediction returned None")
@@ -438,31 +406,31 @@ def predict():
                     raise ValueError("Prediction is invalid (NaN or Inf)")
                 if predicted_price < 0:
                     predicted_price = abs(predicted_price)  # Safety: absolute value
-                
+
                 print(f"✅ Prediction Result: ₹{predicted_price:,.2f}\n")
-                
+
                 return jsonify({
                     'success': True,
                     'predicted_price': f"₹{predicted_price:,.2f}",
                     'price_value': round(predicted_price, 2)
                 }), 200
-                
+
             except Exception as pred_error:
                 print(f"❌ Prediction error (attempt {retry_count + 1}): {str(pred_error)}")
                 retry_count += 1
-                
+
                 if retry_count >= max_retries:
                     return jsonify({'error': f'Prediction failed after {max_retries} attempts: {str(pred_error)}'}), 500
                 continue
-        
+
         except Exception as e:
             print(f"❌ Prediction endpoint error (attempt {retry_count + 1}): {str(e)}")
             retry_count += 1
-            
+
             if retry_count >= max_retries:
                 return jsonify({'error': f'Request processing failed: {str(e)}'}), 500
             continue
-    
+
     return jsonify({'error': 'Maximum retry attempts exceeded'}), 500
 
 
@@ -471,14 +439,11 @@ def model_info():
     """Get model information"""
     try:
         if predictor.best_model is None:
-            predictor.load_model()
-        
-        if predictor.best_model is None:
             return jsonify({
                 'trained': False,
                 'message': 'Model not trained yet'
             })
-        
+
         return jsonify({
             'trained': True,
             'model_type': type(predictor.best_model).__name__,
@@ -588,6 +553,8 @@ if __name__ == '__main__':
     print("🏠 House Price Predictor - Starting...")
     print("="*60)
     print("📍 Open your browser and go to:")
-    print("   http://127.0.0.1:5000")
+    print("   http://127.0.0.1:5000 (local)")
+    print("   Or on the same network:")
+    print("   http://YOUR_IP_ADDRESS:5000")
     print("="*60 + "\n")
-    app.run(debug=True, host='127.0.0.1', port=5000)
+    app.run(debug=True, host="0.0.0.0", port=5000)
